@@ -4,6 +4,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.x509.oid import NameOID
+from utils import load_ca_key, encode_and_sign
 
 
 pad = padding.OAEP(
@@ -36,11 +37,25 @@ class Client:
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
+        message = "{}||{}".format(Client.id, pub.decode())
+        ca = load_ca_key()
+        pipe = encode_and_sign(message, ca, Client.key)
+        pid = str(pipe[0].encode('iso8859_16'))[:20]
+        Client.pipe_send(pid, pipe, 'http://localhost:5000/pipe_receive')
         r = re.post('http://localhost:5000/register', data={
             'uid': Client.id,
-            'pub': pub
+            'pipe': pid
         })
         return r.text
+
+    @staticmethod
+    def pipe_send(pid, pipe, destination):
+        for i in range(len(pipe)):
+            r = re.post(destination, data={
+                'e0': pid,
+                'index': i,
+                'piece': pipe[i]
+            })
 
     '''
     def AS_request(self):

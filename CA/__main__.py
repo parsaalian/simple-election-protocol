@@ -6,13 +6,19 @@ app = Flask(__name__)
 @app.route('/register', methods=['POST'])
 def register():
     data = request.form
-    return CA.register(data['uid'], data['pub'])
+    return CA.register(data['uid'], data['pipe'])
 
 
 @app.route('/get', methods=['POST'])
-def register():
+def get():
     uid = request.form['uid']
     return CA.get(uid)
+
+
+@app.route('/pipe_receive', methods=['POST'])
+def pipe_receive():
+    data = request.form
+    return CA.pipe_receive(data['e0'], data['index'], data['piece'])
 
 
 if __name__ == '__main__':
