@@ -5,7 +5,7 @@ import time
 import requests as re
 from cryptography.hazmat.primitives import serialization, hashes
 # from test import pad, spad, generate_keys, load_ca_key, encode_and_sign, load_certificate, validate
-import utkeys, utsec, utload
+import utkeys, utsec, utload, utpipes
 
 
 class Client:
@@ -34,29 +34,11 @@ class Client:
             pipe = utsec.encode_and_sign(message, public_key, Client.key)
             pid = str(pipe[0].encode('iso8859_16'))[:20]
             utpipes.send(pid, pipe, 'http://localhost:5001/pipe_receive')
-            r = re.send('http://localhost:5001/get_vote_token', data={
+            r = re.post('http://localhost:5001/get_vote_token', data={
                 'pid': pid
             })
+            print(r.text)
     
     @staticmethod
     def send_vote(token, vote):
         pass
-
-    
-    '''
-    def AS_request(self):
-        nonce1 = os.urandom(16)
-        print(self.id.encode() + nonce1)
-        sign = self.key.sign(self.id.encode() + nonce1, spad, hashes.SHA256())
-        payload = "{}||{}||".format(self.id, nonce1).encode() + sign
-        as_cert = CA.get_instance().get('AS')
-        if validate(as_cert):
-            pipe = self.pipe_send(
-                payload, AS.get_instance(), as_cert.public_key())
-            return AS.get_instance().generate_ticket(pipe)
-        else:
-            raise Exception('invalid AS certificate')
-
-    def vote(self, vote):
-        self.AS_request()
-    '''

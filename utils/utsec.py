@@ -20,6 +20,15 @@ def validate(certificate):
         return False
 
 
+def verify(sign, message, pub_key):
+    try:
+        pub_key.verify(sign, message, utpads.spad, hashes.SHA256())
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+
 def encode_and_sign(message, target_pub_key, source_priv_key):
     encoded = message.encode()
     signature = source_priv_key.sign(encoded, utpads.spad, hashes.SHA256())
