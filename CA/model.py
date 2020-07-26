@@ -1,12 +1,13 @@
+import sys
+sys.path.append('utils')
+import utpipes, utload, utpads
+
 import os
 import datetime
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization, hashes
-
-from utils import pad, spad
 
 
 def load_key():
@@ -25,11 +26,14 @@ class CA:
 
     @staticmethod
     def register(uid, pipe):
+        
         message = b''
         try:
             for i in range(len(CA.pipe[pipe])):
-                message += CA.key.decrypt(CA.pipe[pipe][str(i)], pad)
-        except:
+                print(CA.pipe[pipe][str(i)])
+                message += CA.key.decrypt(CA.pipe[pipe][str(i)], utpads.pad)
+        except Exception as e:
+            print(e)
             return 'CA: encryption key is not valid'
 
         payload, signature = message.split(b'--sign')
@@ -37,14 +41,16 @@ class CA:
         pub_key = serialization.load_pem_public_key(
             payload.split(b'||')[1], backend=default_backend())
 
+
         try:
             pub_key.verify(
                 signature,
                 payload,
-                spad,
+                utpads.spad,
                 hashes.SHA256()
             )
-        except:
+        except Exception as e:
+            print(e)
             return 'CA: signature is not valid'
 
         try:
@@ -91,16 +97,5 @@ class CA:
 
     @staticmethod
     def pipe_receive(pid, index, piece):
-        if not pid in CA.pipe:
-            CA.pipe[pid] = {}
-        CA.pipe[pid][index] = piece.encode('iso8859_16')
-        return '{}: piece {} received'.format(pid, index)
-
-    @staticmethod
-    def pipe_send(pid, pipe, destination):
-        for i in range(len(pipe)):
-            r = re.post(destination, data={
-                'e0': pid,
-                'index': i,
-                'piece': pipe[i]
-            })
+        CA.pipe = utpipes.receive(CA.pipe, pid, index, piece)
+        return '{}: received piece {}'.format(pid, index)

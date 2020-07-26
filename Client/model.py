@@ -1,12 +1,11 @@
 import sys
-
-sys.path.append('../utils')
+sys.path.append('utils')
 
 import datetime
 import requests as re
 from cryptography.hazmat.primitives import serialization, hashes
 # from test import pad, spad, generate_keys, load_ca_key, encode_and_sign, load_certificate, validate
-import pipe
+import utkeys
 
 
 class Client:
@@ -15,7 +14,8 @@ class Client:
 
     def __init__(self, cid):
         Client.id = cid
-        Client.key = generate_keys()
+        Client.key = utkeys.generate()
+        utkeys.register(cid, Client.key)
         
     
 

@@ -1,6 +1,11 @@
+import requests as re
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
+
+import utload
+import utsec
+import utpipes
 
 def generate():
     return rsa.generate_private_key(
@@ -15,10 +20,10 @@ def register(uid, key):
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
     message = "{}||{}".format(uid, pub.decode())
-    ca = load_ca_key()
-    pipe = encode_and_sign(message, ca, key)
+    ca = utload.ca_key()
+    pipe = utsec.encode_and_sign(message, ca, key)
     pid = str(pipe[0].encode('iso8859_16'))[:20]
-    Client.pipe_send(pid, pipe, 'http://localhost:5000/pipe_receive')
+    utpipes.send(pid, pipe, 'http://localhost:5000/pipe_receive')
     r = re.post('http://localhost:5000/register', data={
         'uid': uid,
         'pipe': pid
