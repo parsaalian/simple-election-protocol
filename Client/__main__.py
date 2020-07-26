@@ -13,7 +13,14 @@ def home():
 @app.route('/voting_page', methods=['POST'])
 def register():
     Client(request.form['uid'])
-    return 'true'
+    return render_template('vote_page.html')
+
+
+@app.route('/vote', methods=['POST'])
+def vote():
+    Client.vote(request.form['vote'])
+    return 'Thank you for your participation!'
+
 
 if __name__ == '__main__':
     app.run(port=5003)

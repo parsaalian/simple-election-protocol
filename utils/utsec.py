@@ -3,11 +3,11 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 
-import utpads
+import utpads, utload
 
 def validate(certificate):
-    key = load_ca_key()
-    cert_to_check = load_certificate(certificate)
+    key = utload.ca_key()
+    cert_to_check = utload.certificate(certificate)
     try:
         key.verify(
             cert_to_check.signature,
@@ -29,7 +29,6 @@ def encode_and_sign(message, target_pub_key, source_priv_key):
     for i in range(0, len(encoded), piece_size):
         piece = target_pub_key.encrypt(encoded[i:i+piece_size], utpads.pad)
         pipe.append(piece.decode('iso8859_16'))
-        print(piece)
     return pipe
 
 

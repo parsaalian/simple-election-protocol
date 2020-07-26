@@ -26,11 +26,9 @@ class CA:
 
     @staticmethod
     def register(uid, pipe):
-        
         message = b''
         try:
             for i in range(len(CA.pipe[pipe])):
-                print(CA.pipe[pipe][str(i)])
                 message += CA.key.decrypt(CA.pipe[pipe][str(i)], utpads.pad)
         except Exception as e:
             print(e)
@@ -85,7 +83,7 @@ class CA:
             return 'CA: could not register'
 
     @staticmethod
-    def get(self, uid):
+    def get(uid):
         if not os.path.exists('./CA/certificates/{}.pem'.format(uid)):
             return 'CA: no certificate found for this user.'
         else:
