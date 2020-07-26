@@ -1,3 +1,6 @@
 import requests as re
 
-re.get('http://127.0.0.1:5000/parsa')
+r = re.post('http://127.0.0.1:5000/register', {
+    'name': 'parsa'
+})
+print(r.text)
