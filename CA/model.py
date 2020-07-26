@@ -71,9 +71,10 @@ class CA:
                     [x509.DNSName(u"localhost:5000")]),
                 critical=True,
             ).sign(CA.key, hashes.SHA256(), default_backend())
+            cert_bytes = cert.public_bytes(serialization.Encoding.PEM)
             with open('./CA/certificates/{}.pem'.format(uid), 'wb+') as f:
-                f.write(cert.public_bytes(serialization.Encoding.PEM))
-                return 'CA: registered'
+                f.write(cert_bytes)
+                return cert_bytes
         except:
             return 'CA: could not register'
 
@@ -94,3 +95,12 @@ class CA:
             CA.pipe[pid] = {}
         CA.pipe[pid][index] = piece.encode('iso8859_16')
         return '{}: piece {} received'.format(pid, index)
+
+    @staticmethod
+    def pipe_send(pid, pipe, destination):
+        for i in range(len(pipe)):
+            r = re.post(destination, data={
+                'e0': pid,
+                'index': i,
+                'piece': pipe[i]
+            })
