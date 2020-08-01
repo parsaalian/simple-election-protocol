@@ -7,6 +7,12 @@ from model import AS
 app = Flask(__name__)
 
 
+@app.route('/communicate_token', methods=['POST'])
+def communicate_token():
+    message = request.form['message']
+    return AS.communicate_token(message)
+
+
 @app.route('/get_vote_token', methods=['POST'])
 def get_vote_token():
     return AS.get_vote_token(request.form['pid'])

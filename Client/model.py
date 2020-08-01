@@ -1,11 +1,10 @@
 import sys
 sys.path.append('utils')
+import utkeys, utsec, utload, utpipes, utpads
 
 import time
 import requests as re
 from cryptography.hazmat.primitives import serialization, hashes
-# from test import pad, spad, generate_keys, load_ca_key, encode_and_sign, load_certificate, validate
-import utkeys, utsec, utload, utpipes
 
 
 class Client:
@@ -16,6 +15,7 @@ class Client:
         Client.id = cid
         Client.key = utkeys.generate()
         utkeys.register(cid, Client.key)
+    
     
     @staticmethod
     def vote(choice):
@@ -37,8 +37,33 @@ class Client:
             r = re.post('http://localhost:5001/get_vote_token', data={
                 'pid': pid
             })
-            print(r.text)
+            
+            returned_pipe = list(map(lambda x: x.encode('iso8859_16'), r.text.split('--next')))
+            
+            message = b''
+            try:
+                for i in range(len(returned_pipe)):
+                    message += Client.key.decrypt(returned_pipe[i], utpads.pad)
+            except Exception as e:
+                print(e)
+                return 'AS: encryption key is not valid'
+            
+            payload, signature = message.split(b'--sign')
+            uid, token = payload.decode().split('||')
+            if uid == Client.id:
+                return token
+
     
     @staticmethod
     def send_vote(token, vote):
-        pass
+        print(token, vote)
+        r = re.post('http://localhost:5000/get', data={
+            'uid': 'VS'
+        })
+        if utsec.validate(r.text.encode()):
+            cert = utload.certificate(r.text.encode())
+            message = "{}||{}||{}||{}".format(vote, token, round(time.time()), round(time.time() + 10))
+            pipe = utsec.encode_and_sign(message, cert.public_key(), Client.key)
+            r = re.post('http://localhost:5002/vote', data={
+                'message': '--next'.join(pipe)
+            })
