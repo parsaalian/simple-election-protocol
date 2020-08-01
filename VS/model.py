@@ -40,7 +40,8 @@ class VS:
         if time.time() < float(ts) - 1 or time.time() > float(te) + 1:
             return 'Payload expired'
         
-        is_valid = VS.communicate_token(token)
+        session_key = os.urandom(16).hex()
+        is_valid = VS.communicate_token(token, session_key)
         if is_valid:
             votes = []
             with open('./VS/votes.json', 'r') as f:
@@ -53,8 +54,9 @@ class VS:
 
         
     @staticmethod
-    def communicate_token(t):
-        token = ('VS' + t).encode()
+    def communicate_token(t, sk):
+        token = ('VS' + t + sk).encode()
+        print(len(token))
         cipher = Cipher(algorithms.AES(VS.psk), modes.CBC(VS.iv), backend=default_backend())
         encryptor = cipher.encryptor()
         ct = (encryptor.update(token) + encryptor.finalize()).decode('iso8859_16')
@@ -69,7 +71,7 @@ class VS:
             return False
         print('retrying in 5 seconds')
         time.sleep(5)
-        return VS.communicate_token(t)
+        return VS.communicate_token(t, sk)
     
     
     @staticmethod
