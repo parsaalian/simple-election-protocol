@@ -20,7 +20,7 @@ class Client:
     @staticmethod
     def vote(choice):
         token = Client.get_vote_token()
-        Client.send_vote(token, choice)
+        return Client.send_vote(token, choice)
     
     @staticmethod
     def get_vote_token():
@@ -56,7 +56,6 @@ class Client:
     
     @staticmethod
     def send_vote(token, vote):
-        print(token, vote)
         r = re.post('http://localhost:5000/get', data={
             'uid': 'VS'
         })
@@ -67,3 +66,5 @@ class Client:
             r = re.post('http://localhost:5002/vote', data={
                 'message': '--next'.join(pipe)
             })
+            return r.text
+        return 'invalid response from VS'

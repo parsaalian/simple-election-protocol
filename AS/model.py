@@ -43,7 +43,7 @@ def read_encrypted_csv():
     fernet = Fernet(key)
     decrypted = fernet.decrypt(data)
         
-    csv = pd.read_csv(StringIO(decrypted.decode()), index_col='token', sep=',')
+    csv = pd.read_csv(StringIO(decrypted.decode()), index_col="token", sep=',')
     return csv
 
 
@@ -75,9 +75,7 @@ class AS:
         utkeys.register(AS.id, AS.key)
         log('keys registered')
         log('loading database...')
-        current = read_encrypted_csv()
-        if len(current) == 0:
-            write_encrypted_csv(pd.DataFrame(columns=['token', 'id', 'voted', 'session']))
+        write_encrypted_csv(pd.read_csv('./AS/tokens.csv', index_col="token"))
         log('database loaded')
     
     @staticmethod

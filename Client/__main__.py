@@ -18,8 +18,7 @@ def register():
 
 @app.route('/vote', methods=['POST'])
 def vote():
-    Client.vote(request.form['vote'])
-    return 'Thank you for your participation!'
+    return Client.vote(request.form['vote'])
 
 
 if __name__ == '__main__':

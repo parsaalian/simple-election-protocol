@@ -7,6 +7,7 @@ import time
 import json
 import logging
 import requests as re
+from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -20,7 +21,7 @@ def write_encrypted_json(obj):
     file.close()
     
     fernet = Fernet(key)
-    encrypted = fernet.encrypt(json.dumps(obj))
+    encrypted = fernet.encrypt(json.dumps(obj).encode())
     
     with open('./VS/votes.json.encrypted', 'wb') as f:
         f.write(encrypted)
@@ -36,7 +37,7 @@ def read_encrypted_json():
         data = f.read()
     
     fernet = Fernet(key)
-    decrypted = fernet.decrypt(data)
+    decrypted = fernet.decrypt(data).decode()
         
     return json.loads(decrypted)
 
@@ -68,9 +69,7 @@ class VS:
         utkeys.register(VS.id, VS.key)
         log('keys registered')
         log('loading database...')
-        votes = read_encrypted_json()
-        if len(votes) == 0:
-            write_encrypted_json([])
+        write_encrypted_json([])
         log('database loaded')
     
     
